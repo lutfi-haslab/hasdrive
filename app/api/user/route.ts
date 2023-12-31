@@ -9,6 +9,9 @@ export async function GET(req: Request) {
       where: {
         id: String(id),
       },
+      include: {
+        storage: true
+      }
     });
     return Response.json(user);
   } else {

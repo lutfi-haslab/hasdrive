@@ -24,7 +24,7 @@ export async function GET(req: Request) {
     });
     return Response.json(file);
   } else {
-    const files = await prisma.storage.findMany();
+    const files = await prisma.file.findMany();
     return Response.json(files);
   }
 }
