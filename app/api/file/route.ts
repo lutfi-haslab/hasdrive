@@ -8,9 +8,8 @@ const s3Client = new S3Client({
     accessKeyId: process.env.NEXT_PUBLIC_ACCESS_KEY as string,
     secretAccessKey: process.env.NEXT_PUBLIC_SECRET_KEY as string,
   },
-  endpoint: process.env.NEXT_PUBLIC_ENDPOINT
+  endpoint: process.env.NEXT_PUBLIC_ENDPOINT,
 });
-
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -68,15 +67,13 @@ export async function POST(req: NextRequest) {
           storageId,
         },
       });
-  
+
       return Response.json(resFile);
     }
   } catch (error) {
     console.error("Error uploading image:", error);
     return NextResponse.json({ message: "Error uploading image" });
   }
-
-    
 }
 
 export async function PUT(req: Request) {
@@ -94,6 +91,19 @@ export async function PUT(req: Request) {
       urlPath: res?.urlPath,
       size: res?.size,
       storageId: res?.storageId,
+    },
+  });
+
+  return Response.json(file);
+}
+
+export async function DELETE(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get("id");
+
+  const file = await prisma.file.delete({
+    where: {
+      id: String(id),
     },
   });
 

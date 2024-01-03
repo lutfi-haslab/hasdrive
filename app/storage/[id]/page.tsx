@@ -13,6 +13,7 @@ import BreadCrumb from "@/components/breadcumbs";
 import MyDropzone from "@/components/dropzone";
 import TableRowChildren from "./TableRow";
 
+
 export default async function Storage({ params }: { params: { id: string } }) {
   const user = await currentUser();
   const response = await fetch(
@@ -40,6 +41,8 @@ export default async function Storage({ params }: { params: { id: string } }) {
               <TableHead>Storage</TableHead>
               <TableHead className="text-right">Description</TableHead>
               <TableHead className="text-right">ID</TableHead>
+              <TableHead className="text-right">Download</TableHead>
+              <TableHead className="text-right">Delete</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

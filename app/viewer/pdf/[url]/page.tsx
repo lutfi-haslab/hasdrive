@@ -1,60 +1,128 @@
-// @ts-nocheck
-"use client"
+"use client";
+import {
+  ProgressBar,
+  ScrollMode,
+  SpecialZoomLevel,
+  ViewMode,
+  Viewer,
+  Worker,
+} from "@react-pdf-viewer/core";
+import {
+  ToolbarProps,
+  ToolbarSlot,
+  defaultLayoutPlugin,
+} from "@react-pdf-viewer/default-layout";
 
-import React, { useState } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
+// Import styles
+import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.js',
-  import.meta.url,
-).toString();
+// Import the styles
+import "@react-pdf-viewer/core/lib/styles/index.css";
+import { ReactElement } from "react";
 
-function Viewer({params}: {params: {url: string}}) {
-  const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState<number>(1);
-
-  const handleNextPage = () => {
-    if (pageNumber < numPages) {
-      setPageNumber(pageNumber + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (pageNumber > 1) {
-      setPageNumber(pageNumber - 1);
-    }
-  };
-
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
-    // Ensure the current page number is within the bounds of the new document
-    setPageNumber((prevPage) => Math.min(prevPage, numPages));
-  };
-
-  return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <Document
-        file={`https://pub-e9f8e24ea55741c2b8339e9e52d47d05.r2.dev/${params.url}`}
-        onLoadSuccess={onDocumentLoadSuccess}
+const PdfViewer = ({ params }: { params: { url: string } }) => {
+  const renderToolbar = (Toolbar: (props: ToolbarProps) => ReactElement) => (
+    <>
+      <Toolbar>
+        {(props: ToolbarSlot) => {
+          const {
+            CurrentPageInput,
+            Download,
+            EnterFullScreen,
+            GoToNextPage,
+            GoToPreviousPage,
+            NumberOfPages,
+            Print,
+            ShowSearchPopover,
+            Zoom,
+            ZoomIn,
+            ZoomOut,
+            ShowProperties,
+            SwitchViewMode,
+            SwitchScrollMode
+          } = props;
+          return (
+            <>
+              <div style={{ padding: "0px 2px" }}>
+                <ShowSearchPopover />
+              </div>
+              <div style={{ padding: "0px 2px" }}>
+                <ZoomOut />
+              </div>
+              <div style={{ padding: "0px 2px" }}>
+                <Zoom />
+              </div>
+              <div style={{ padding: "0px 2px" }}>
+                <ZoomIn />
+              </div>
+              <div style={{ padding: "0px 2px", marginLeft: "auto" }}>
+                <GoToPreviousPage />
+              </div>
+              <div style={{ padding: "0px 2px", width: "4rem" }}>
+                <CurrentPageInput />
+              </div>
+              <div style={{ padding: "0px 2px" }}>
+                / <NumberOfPages />
+              </div>
+              <div style={{ padding: "0px 2px" }}>
+                <GoToNextPage />
+              </div>
+              <div style={{ padding: "0px 2px", marginLeft: "auto" }}>
+                <EnterFullScreen />
+              </div>
+              <div style={{ padding: "0px 2px" }}>
+                <Download />
+              </div>
+              <div style={{ padding: "0px 2px" }}>
+                <Print />
+              </div>
+              <div style={{ padding: "0px 2px" }}>
+                <SwitchViewMode mode={ViewMode.SinglePage} />
+              </div>
+              <div style={{ padding: "0px 2px" }}>
+                <SwitchViewMode mode={ViewMode.DualPage} />
+              </div>
+            </>
+          );
+        }}
+      </Toolbar>
+      {/* <div
+        style={{
+          borderTop: "1px solid rgba(0, 0, 0, 0.1)",
+          marginTop: "4px",
+          padding: "4px",
+        }}
       >
-        <Page pageNumber={pageNumber} scale={1.5} />
-      </Document>
-      <p style={{ textAlign: 'center' }}>
-        <button onClick={handlePrevPage} disabled={pageNumber === 1}>
-          Previous
-        </button>
-        {' | '}
-        <button onClick={handleNextPage} disabled={pageNumber === numPages}>
-          Next
-        </button>
-      </p>
-      <p style={{ textAlign: 'center' }}>
-        Page {pageNumber} of {numPages}
-      </p>
-    </div>
+        Custom element
+      </div> */}
+    </>
   );
-}
 
-export default Viewer;
+  const defaultLayoutPluginInstance = defaultLayoutPlugin({
+    renderToolbar,
+    sidebarTabs: (defaultTabs) => [
+      // Remove the attachments tab (\`defaultTabs[2]\`)
+      defaultTabs[0], // Bookmarks tab
+      defaultTabs[1], // Thumbnails tab
+    ],
+  });
+  return (
+    <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+      <div className="border-2">
+        <Viewer
+          fileUrl={`https://pub-e9f8e24ea55741c2b8339e9e52d47d05.r2.dev/${params.url}`}
+          renderLoader={(percentages: number) => (
+            <div style={{ width: "240px" }}>
+              <ProgressBar progress={Math.round(percentages)} />
+            </div>
+          )}
+          viewMode={ViewMode.SinglePage}
+          defaultScale={SpecialZoomLevel.ActualSize}
+          plugins={[defaultLayoutPluginInstance]}
+        />
+      </div>
+    </Worker>
+  );
+};
+
+export default PdfViewer;
